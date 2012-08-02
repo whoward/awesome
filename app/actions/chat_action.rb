@@ -2,30 +2,28 @@ require 'yajl'
 require 'em-hiredis'
 
 class ChatAction < Cramp::Websocket
-  on_start :create_redis
-  on_finish :handle_leave, :destroy_redis
-  on_data :received_data
+  on_start :connected
+  on_finish :disconnected
+  on_data :data_received
   
-  def create_redis
+  def connected
     @pub = EM::Hiredis.connect("redis://localhost:6379")
     @sub = EM::Hiredis.connect("redis://localhost:6379")
   end
   
-  def destroy_redis
+  def disconnected
+    publish :action => 'control', :user => @user, :message => 'left the chat room'
+
     @pub.close_connection
     @sub.close_connection
   end
   
-  def received_data(data)
+  def data_received(data)
     msg = parse_json(data)
-    case msg[:action]
-    when 'join'
-      handle_join(msg)
-    when 'message'
-      handle_message(msg)
-    else
-      # skip
-    end
+
+    return unless respond_to?("handle_#{msg[:action]}", false)
+
+    send("handle_#{msg[:action]}", msg)
   end
   
   def handle_join(msg)
@@ -34,15 +32,11 @@ class ChatAction < Cramp::Websocket
     publish :action => 'control', :user => @user, :message => 'joined the chat room'
   end
   
-  def handle_leave
-    publish :action => 'control', :user => @user, :message => 'left the chat room'
-  end
-  
   def handle_message(msg)
     publish msg.merge(:user => @user)
   end
   
-  private
+private
 
   def subscribe
     @sub.subscribe('chat')
@@ -58,6 +52,6 @@ class ChatAction < Cramp::Websocket
   end
   
   def parse_json(str)
-    Yajl::Parser.parse(str, :symbolize_keys => true)
+    Yajl::Parser.parse(str, :symbolize_keys => true) rescue {}
   end
 end
