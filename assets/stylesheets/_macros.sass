@@ -1,0 +1,41 @@
+@mixin border-radius($corner: "all", $radius: 5)
+  @if $corner == "all"
+    border-radius: $radius + px
+    -moz-border-radius: $radius + px
+    -webkit-border-radius: $radius + px
+
+  @if $corner == "top_right"
+    border-top-right-radius: $radius + px
+    -moz-border-radius-topright: $radius + px
+    -webkit-border-top-right-radius: $radius + px
+
+  @if $corner == "bottom_right"
+    border-bottom-right-radius: $radius + px
+    -moz-border-radius-bottomright: $radius + px
+    -webkit-border-bottom-right-radius: $radius + px
+
+  @if $corner == "bottom_left"
+    border-bottom-left-radius: $radius + px
+    -moz-border-radius-bottomleft: $radius + px
+    -webkit-border-bottom-left-radius: $radius + px
+
+  @if $corner == "top_left"
+    border-top-left-radius: $radius + px
+    -moz-border-radius-topleft: $radius + px
+    -webkit-border-top-left-radius: $radius + px
+
+  @if $corner == "top"
+    @include border-radius(top_left, $radius)
+    @include border-radius(top_right, $radius)
+
+  @if $corner == "right"
+    @include border-radius(top_right, $radius)
+    @include border-radius(bottom_right, $radius)
+
+  @if $corner == "bottom"
+    @include border-radius(bottom_right, $radius)
+    @include border-radius(bottom_left, $radius)
+
+  @if $corner == "left"
+    @include border-radius(bottom_left, $radius)
+    @include border-radius(top_left, $radius)
