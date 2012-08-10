@@ -12,7 +12,7 @@ module Awesome
          end
 
          def env
-            @env ||= ENV.fetch("RACK_ENV", "development")
+            ENV["RACK_ENV"] ||= "development"
          end
 
          def routes
@@ -22,6 +22,9 @@ module Awesome
          # Initialize the application
          def initialize!
             Cramp::Websocket.backend = :thin
+
+            Mongoid.load! File.join(root, "config", "mongoid.yml")
+            Mongoid.allow_dynamic_fields = false
          end
       end
    end

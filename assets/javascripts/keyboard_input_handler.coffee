@@ -1,11 +1,11 @@
 
-class window.KeyboardInputHandler
+class KeyboardInputHandler extends BasicObject
    constructor: ->
       jQuery(document).bind "keydown", (e) =>
          return if jQuery(e.target).is(":input")
 
          if e.keyCode is 8 or e.which is 8
-            game_screen.input.backspace()
+            GameScreen.instance.input.backspace()
             return false         
 
          return true
@@ -17,18 +17,20 @@ class window.KeyboardInputHandler
 
          # check if the given character is a non printable character
          if /[\x00-\x1F]/.test(char)
-            return this.command_key(e.keyCode || e.which)
+            return @command_key(e.keyCode || e.which)
          else
-            return this.text_key(char)
+            return @text_key(char)
 
+   @get "instance", ->
+      @__instance ||= new KeyboardInputHandler()
 
    command_key: (keyCode) ->
       switch keyCode
          # enter key
-         when 13 then game_screen.submit_input()
+         when 13 then GameScreen.instance.submit_input()
 
          # backspace key
-         when 8 then game_screen.input.backspace()
+         when 8 then GameScreen.instance.input.backspace()
 
          # meta keys
          when 91, 92, 93
@@ -47,5 +49,5 @@ class window.KeyboardInputHandler
       return false
 
    text_key: (char) ->
-      game_screen.input.append(char)
+      GameScreen.instance.input.append(char)
       return false

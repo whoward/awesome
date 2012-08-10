@@ -1,58 +1,97 @@
 #= require 'application_socket'
 
-class window.Connection
+class Connection extends BasicObject
    constructor: ->
       @socket = new ApplicationSocket('/websocket')
 
       @socket.addListener(this)
 
+   @get "instance", ->
+      @__instance ||= new Connection()
+
    login: (name, password) ->
       @username = name
-      this.command "login"
+      @command "login"
          username: name
-         password: md5(password)
+         password: password
 
    register: (name, password) ->
       @username = name
-      this.command "register"
+      @command "register"
          username: name
-         password: md5(password)
+         password: password
 
    pm: (name, msg) ->
-      this.command "pm"
+      @command "pm"
          username: name
          message: msg
 
    talk: (msg) ->
-      this.command "talk"
+      @command "talk"
          message: msg
 
    list: ->
-      this.command "list"
+      @command "list"
 
    go: (dir) ->
-      this.command "go"
+      @command "travel"
          direction: dir
+         
 # private
    socketOpened: (socket, event) ->
-      game_screen.connected()
+      GameScreen.instance.connected()
 
    socketMessage: (socket, message) ->
-      #@message_received(message.type, message.message)
+      action = message.action
+
+      message.action = undefined
+
+      switch action
+         when "talk"
+            GameScreen.instance.user_broadcast(message.sender, message.message)
+
+         when "broadcast"
+            GameScreen.instance.message(message.message)
+
+         when "display_area"
+            GameScreen.instance.area(message.area)
+
+         when "login_required"
+            @username = null
+            GameScreen.instance.message(message.message)
+            LoginDialog.instance.show()
+
+         when "login_success"
+            GameScreen.instance.message(message.message)
+            LoginDialog.instance.hide()
+            RegistrationDialog.instance.hide()
+
+         when "login_failure"
+            alert(message.message)
+
+         when "register_failure"
+            alert(message.message)
+
+         when "register_success"
+            GameScreen.instance.message(message.message)
+            LoginDialog.instance.hide()
+            RegistrationDialog.instance.hide()
+
+         when "error"
+            GameScreen.instance.error(message.message)
+
+         else
+            console?.log("unhandled action: ", action, message)
+
 
    socketClosed: (socket, event) ->
-      game_screen.disconnect()
-      # @socket.on "talk", (message) ->
-      #    game_screen.user_broadcast message.sender, message.message
+      GameScreen.instance.disconnect()
 
       # @socket.on "pm", (message) ->
       #    game_screen.private_message_received message.sender, message.message
 
       # @socket.on "list", (data) ->
       #    game_screen.user_list(data.users)
-
-      # @socket.on "area", (areaData) ->
-      #    game_screen.area(areaData)
 
       # @socket.on "error", (error) =>
       #    this.error_received(error.type, error.message)
@@ -61,29 +100,5 @@ class window.Connection
       # @socket.emit "message", message
 
    command: (command, params) ->
-      # @socket.emit "command", command, params
-
-   message_received: (type, message) ->
-      switch type
-         when "LoginRequired"
-            @username = null
-            game_screen.message(message)
-            login_dialog.show()
-
-         when "LoginSuccess"
-            game_screen.message(message)
-            login_dialog.hide()
-
-         when "RegistrationSuccess"
-            game_screen.message(message)
-            registration_dialog.hide()
-
-         else
-            game_screen.message(message)
-
-   error_received: (type, message) ->
-      switch type
-         when "LoginFailure" then alert(message)
-         when "RegistrationFailure" then alert(message)
-         else
-            game_screen.error message
+      params.action = command
+      @socket.send(params)

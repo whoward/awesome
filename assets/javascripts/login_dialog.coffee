@@ -1,6 +1,6 @@
 #= require 'lib/jqmodal.r14'
 
-class window.LoginDialog
+class LoginDialog extends BasicObject
    constructor: (root) ->
       @root = jQuery("<div/>").attr("id", "login").appendTo(root)
 
@@ -14,7 +14,7 @@ class window.LoginDialog
 
       @register = jQuery("<a href='#'/>").html("Register").appendTo(@root)
 
-      @root.jqm({modal: true})
+      @root.jqm(modal: true)
 
       jQuery(window).bind("resize", => 
          left = jQuery(window).width() / 2 - jQuery(@root).width() / 2
@@ -33,6 +33,9 @@ class window.LoginDialog
          if (ev.which || ev.keyCode) is 13
             this.submit()
 
+   @get "instance", ->
+      @__instance ||= new LoginDialog("body")
+
    show: ->
       @root.jqmShow()
       @username.focus()
@@ -41,10 +44,10 @@ class window.LoginDialog
       @root.jqmHide()
 
    submit: ->
-      connection.login(@username.val(), @password.val())
+      Connection.instance.login(@username.val(), @password.val())
       @username.val(null)
       @password.val(null)
 
    show_registration_dialog: ->
-      this.hide()
-      registration_dialog.show()
+      @hide()
+      RegistrationDialog.instance.show()

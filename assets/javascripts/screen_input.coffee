@@ -1,5 +1,5 @@
 
-class window.ScreenInput
+class ScreenInput
    constructor: (root) ->
       @root = jQuery("<div/>").attr("id", "console").appendTo(root)
 

@@ -1,3 +1,5 @@
+#= require 'lib/jquery-1.7.2.min'
+#= require 'lib/basic_object'
 #= require 'core_extensions'
 #= require 'game_screen'
 #= require 'keyboard_input_handler'
@@ -7,9 +9,7 @@
 #= require 'registration_dialog'
 
 jQuery(document).ready ->
-   window.game_screen = new GameScreen("body")
-   window.input_handler = new KeyboardInputHandler()
-   window.connection = new Connection()
-   window.input_parser = new InputParser()
-   window.login_dialog = new LoginDialog("body")
-   window.registration_dialog = new RegistrationDialog("body")
+   GameScreen.instance
+   Connection.instance
+   KeyboardInputHandler.instance
+   InputParser.instance

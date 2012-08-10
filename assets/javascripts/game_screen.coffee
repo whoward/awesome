@@ -4,8 +4,7 @@
 #= require 'screen_message_queue'
 #= require 'screen_input'
 
-
-class window.GameScreen
+class GameScreen extends BasicObject
    constructor: (root) ->
       # build up the console divs
       @container = jQuery("<div/>").attr("id", "container").appendTo(root)
@@ -36,8 +35,11 @@ class window.GameScreen
       # and display a friendly message about help
       @messages.colored "golden-yellow", "type /help for commands"
 
+   @get "instance", ->
+      @__instance ||= new GameScreen("body")
+
    submit_input: ->
-      input_parser.process_input(@input.get())      
+      InputParser.instance.process_input(@input.get())      
       @input.clear()
 
    connected: ->
@@ -85,10 +87,10 @@ class window.GameScreen
       
       @messages.append area.description.h()
 
-      if area.people.length > 1
-         @messages.colored "cyan", "There are #{area.people.length} people here: #{area.people.join(", ")}"
-      else
-         @messages.colored "cyan", "Nobody is here except you."
+      # if area.people.length > 1
+      #    @messages.colored "cyan", "There are #{area.people.length} people here: #{area.people.join(", ")}"
+      # else
+      #    @messages.colored "cyan", "Nobody is here except you."
 
       @messages.colored "purple", "There are #{exit_count} obvious exits:"
 

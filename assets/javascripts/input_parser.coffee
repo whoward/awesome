@@ -1,32 +1,35 @@
 CommandRegex = /^\/([A-Za-z]+)(\s+(.+))?/
 
-class window.InputParser
+class InputParser extends BasicObject
+
+   @get "instance", ->
+      @__instance ||= new InputParser()
 
    process_input: (message) ->
       if match = CommandRegex.exec(message)
          this.processCommand(match[1], match[3])
 
       else if message is "/"
-         game_screen.error "Sorry, I don't understand what kind of command you're trying to do"
+         GameScreen.instance.error "Sorry, I don't understand what kind of command you're trying to do"
       
       else
-         connection.talk(message)
+         Connection.instance.talk(message)
 
    processCommand: (command, text) ->
       switch command
          when "say"
             [username, message] = (/^([A-Za-z0-9\_\-]+)\s+(.+)/.exec(text) || ["", "", ""])[1..]
             if username and message
-               connection.pm username, message
-               game_screen.private_message_sent username, message
+               Connection.instance.pm username, message
+               GameScreen.instance.private_message_sent username, message
             else
-               game_screen.error "usage: /say <username> <message>".html_escape()
+               GameScreen.instance.error "usage: /say <username> <message>".html_escape()
 
-         when "go" then connection.go(text)
+         when "go" then Connection.instance.go(text)
 
-         when "list" then connection.list()
+         when "list" then Connection.instance.list()
 
-         when "help" then game_screen.help()
+         when "help" then GameScreen.instance.help()
 
-         else game_screen.error "Sorry, I don't understand the command \"#{command}\""
+         else GameScreen.instance.error "Sorry, I don't understand the command \"#{command}\""
 

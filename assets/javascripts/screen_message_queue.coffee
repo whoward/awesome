@@ -1,5 +1,5 @@
 
-class window.ScreenMessageQueue
+class ScreenMessageQueue
    constructor: (root) ->
       @root = jQuery("<ul/>").attr("id", "messages").appendTo(root)
 

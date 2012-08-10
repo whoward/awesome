@@ -1,6 +1,6 @@
 #= require 'lib/jqmodal.r14'
 
-class window.RegistrationDialog
+class RegistrationDialog extends BasicObject
    constructor: (root) ->
       @root = jQuery("<div/>").attr("id", "register").appendTo(root)
 
@@ -22,9 +22,12 @@ class window.RegistrationDialog
       ).trigger("resize")
 
       @register.click =>
-         connection.register(@username.val(), @password.val())
+         Connection.instance.register(@username.val(), @password.val())
          @username.val(null)
          @password.val(null)
+
+   @get "instance", ->
+      @__instance ||= new RegistrationDialog("body")
 
    show: ->
       @root.jqmShow()
