@@ -12,13 +12,13 @@ class RegistrationDialog extends BasicObject
 
       @register = jQuery("<button/>").html("Register").appendTo(@root)
 
-      @root.jqm({modal: true})
+      @root.jqm(modal: true)
 
       jQuery(window).bind("resize", => 
          left = jQuery(window).width() / 2 - jQuery(@root).width() / 2
          top = jQuery(window).height() / 2 - jQuery(@root).height() / 2
 
-         @root.css({left: left, top: top})
+         @root.css(left: left, top: top)
       ).trigger("resize")
 
       @register.click =>
