@@ -10,6 +10,7 @@ class ChatAction < Cramp::Websocket
     @pub = EM::Hiredis.connect("redis://localhost:6379")
     @sub = EM::Hiredis.connect("redis://localhost:6379")
 
+    #TODO: session handling might be awesome
     login_required!
   end
   
@@ -47,13 +48,9 @@ class ChatAction < Cramp::Websocket
     if @user == nil
       login_failure! "Login error: no matching credentials for the username/password you provided"
     else
-      subscribe
-      
       login_success! "You have successfully logged in, welcome!"
 
-      broadcast! "#{@user.login} has logged on"
-
-      set_area! World.instance.find_area_by_id("1-01")
+      join_world(@user, World.instance)
     end
   end
 
@@ -74,6 +71,8 @@ class ChatAction < Cramp::Websocket
       @user = user
 
       register_success! "You have successfully registered! now logging you in."
+
+      join_world(@user, World.instance)
     else
       register_failure! "Whoops! #{user.errors.full_messages.to_sentence}"
     end
@@ -100,6 +99,14 @@ class ChatAction < Cramp::Websocket
   end
   
 private
+  def join_world(user, world)
+    subscribe
+
+    broadcast! "#{user.login} has logged on"
+
+    set_area! world.find_area_by_id("1-01")
+  end
+
   def login_required!
     emit :login_required, :message => "Welcome to Seven Helms, please log in or register a new account."
   end

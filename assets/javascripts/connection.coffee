@@ -80,6 +80,9 @@ class Connection extends BasicObject
          when "error"
             GameScreen.instance.error(message.message)
 
+         when "undefined_direction"
+            GameScreen.instance.error "You can't go that way"
+
          else
             console?.log("unhandled action: ", action, message)
 
