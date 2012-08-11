@@ -34,10 +34,10 @@ end
 Bundler.require(:default, Awesome::App.env)
 
 # load all files under the "app" and "lib" directory
-Find.find(File.join Awesome::App.root, "app") do |filename|
+Find.find(File.join Awesome::App.root, "lib") do |filename|
    require filename if File.extname(filename) == '.rb'
 end
 
-Find.find(File.join Awesome::App.root, "lib") do |filename|
+Find.find(File.join Awesome::App.root, "app") do |filename|
    require filename if File.extname(filename) == '.rb'
 end
