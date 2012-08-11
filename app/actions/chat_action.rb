@@ -7,9 +7,6 @@ class ChatAction < Cramp::Websocket
   on_data :data_received
   
   def connected
-    @pub = EM::Hiredis.connect("redis://localhost:6379")
-    @sub = EM::Hiredis.connect("redis://localhost:6379")
-
     #TODO: session handling might be awesome
     login_required!
   end
@@ -17,8 +14,7 @@ class ChatAction < Cramp::Websocket
   def disconnected
     emit :talk, :message => "User has disconnected", :sender => "Server"
 
-    @pub.close_connection
-    @sub.close_connection
+    pubsub.disconnect!
   end
   
   def data_received(data)
@@ -94,15 +90,25 @@ class ChatAction < Cramp::Websocket
     # end
   end
   
-  def handle_talk(msg)
-    # publish msg.merge(:user => @user.login)
+  def handle_talk(data)
+    puts "broadcasting across pubsub: #{data[:message]}"
+    pubsub.broadcast(data[:message])
   end
   
 private
-  def join_world(user, world)
-    subscribe
+  def join_instance(user, instance)
+    user.instance = instance
+    user.save!
 
-    broadcast! "#{user.login} has logged on"
+    pubsub.on_broadcast do |message|
+      broadcast! message
+    end
+  end
+
+  def join_world(user, world)
+    join_instance user, Instance.main_instance
+
+    pubsub.broadcast "#{user.login} has logged on"
 
     if user.area
       set_area! user.area
@@ -111,48 +117,47 @@ private
     end    
   end
 
-  def login_required!
-    emit :login_required, :message => "Welcome to Seven Helms, please log in or register a new account."
-  end
-
-  def login_failure!(message)
-    emit :login_failure, :message => message
-  end
-
-  def login_success!(message)
-    emit :login_success, :message => message
-  end
-
-  def register_failure!(message)
-    emit :register_failure, :message => message
-  end
-
-  def register_success!(message)
-    emit :register_success, :message => message
-  end
-
-  def broadcast!(message)
-    emit :broadcast, :message => message
-  end
-
   def set_area!(area)
     @user.area = area
     @user.save!
 
-    emit :display_area, :area => area.serialized_attributes
+    display_area!(area)
+  end
+
+  def login_required!
+    emit :login_required, message: "Welcome to Seven Helms, please log in or register a new account."
+  end
+
+  def login_failure!(message)
+    emit :login_failure, message: message
+  end
+
+  def login_success!(message)
+    emit :login_success, message: message
+  end
+
+  def register_failure!(message)
+    emit :register_failure, message: message
+  end
+
+  def register_success!(message)
+    emit :register_success, message: message
+  end
+
+  def broadcast!(message)
+    emit :broadcast, message: message
+  end
+
+  def display_area!(area)
+    emit :display_area, area: area.serialized_attributes
   end
 
   def undefined_direction!(message)
-    emit :undefined_direction, :message => message
+    emit :undefined_direction, message: message
   end
 
-  def subscribe
-    @sub.subscribe('chat')
-    @sub.on(:message) {|channel, message| render(message) }    
-  end
-  
-  def publish(type, message)
-    @pub.publish(type, encode_json(message))
+  def pubsub
+    @pubsub ||= PubSubClient.new(Instance.main_instance)
   end
 
   def emit(action, data={})
@@ -164,6 +169,6 @@ private
   end
   
   def parse_json(str)
-    Yajl::Parser.parse(str, :symbolize_keys => true) rescue {}
+    Yajl::Parser.parse(str, symbolize_keys: true) rescue {}
   end
 end
