@@ -6,6 +6,9 @@ class User
 
    field :login, type: String
    field :hashed_password, type: String
+   field :area_id, type: String
+
+   belongs_to :instance
 
    before_validation :assign_password
 
@@ -25,6 +28,18 @@ class User
          return user
       else
          return nil
+      end
+   end
+
+   def area(world=World.instance)
+      world.find_area_by_id(self.area_id)
+   end
+
+   def area=(id_or_area)
+      if id_or_area.is_a? String
+         self.area_id = id_or_area
+      else
+         self.area_id = id_or_area.id
       end
    end
 

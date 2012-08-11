@@ -79,7 +79,7 @@ class ChatAction < Cramp::Websocket
   end
 
   def handle_travel(data)
-    current_area = @area
+    current_area = @user.area
     next_area = current_area.find_exit_by_name(data[:direction])
 
     if next_area == nil
@@ -104,7 +104,11 @@ private
 
     broadcast! "#{user.login} has logged on"
 
-    set_area! world.find_area_by_id("1-01")
+    if user.area
+      set_area! user.area
+    else
+      set_area! world.find_area_by_id("1-01")
+    end    
   end
 
   def login_required!
@@ -132,7 +136,9 @@ private
   end
 
   def set_area!(area)
-    @area = area
+    @user.area = area
+    @user.save!
+
     emit :display_area, :area => area.serialized_attributes
   end
 
