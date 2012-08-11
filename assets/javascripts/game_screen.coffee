@@ -61,7 +61,7 @@ class GameScreen extends BasicObject
       @messages.colored "blue", "Users: #{data.users.join(", ")}"
 
    user_broadcast: (sender, message) ->
-      if sender == connection.username
+      if sender == Connection.instance.username
          message = @messages.colored "blue talk", "#{sender}: #{message}".safe()
       else
          message = @messages.classed "talk", "<a href='#'>#{sender}</a>: #{message}".safe()

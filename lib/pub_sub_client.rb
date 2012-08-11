@@ -41,6 +41,10 @@ class PubSubClient
       publish :broadcast, message: message
    end
 
+   def chat(sender, message)
+      publish :chat, message: message, sender: sender
+   end
+
    # handles all of the on_xyz methods
    def respond_to?(method)
       !!(method =~ /^on_(\w+)$/) or super
@@ -56,7 +60,8 @@ class PubSubClient
 private
    def parse_event_arguments(event, data)
       case event.to_sym
-         when :broadcast then [data[:message]]
+         when :broadcast then data.values_at(:message)
+         when :chat then data.values_at(:sender, :message)
          else
             data
       end

@@ -30,6 +30,10 @@ private
       emit :broadcast, message: message
    end
 
+   def display_talk!(sender, message)
+      emit :talk, sender: sender, message: message
+   end
+
    def display_area!(area)
       emit :display_area, area: area.serialized_attributes
    end

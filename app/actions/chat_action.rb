@@ -3,7 +3,7 @@ require 'em-hiredis'
 
 class ChatAction < Cramp::Websocket
   include GameWebSocketProtocol
-  
+
   on_start :connected
   on_finish :disconnected
   on_data :data_received
@@ -92,8 +92,7 @@ class ChatAction < Cramp::Websocket
   end
   
   def handle_talk(data)
-    puts "broadcasting across pubsub: #{data[:message]}"
-    pubsub.broadcast(data[:message])
+    pubsub.chat(@user.login, data[:message])
   end
   
 private
@@ -103,6 +102,10 @@ private
 
     pubsub.on_broadcast do |message|
       broadcast! message
+    end
+
+    pubsub.on_chat do |sender, message|
+      display_talk! sender, message
     end
   end
 
