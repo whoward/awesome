@@ -16,6 +16,8 @@ class ChatAction < Cramp::Websocket
   def disconnected
     pubsub.broadcast "#{@user.login} has disconnected"
     pubsub.disconnect!
+
+    @user.try(:logout!)
   end
   
   def data_received(data)
@@ -38,13 +40,15 @@ class ChatAction < Cramp::Websocket
       return login_failure! "Please provide both a username and password"
     end
 
-    #TODO: check if the user is already logged in
-
     @user = User.find_by_credentials login: username, password: password
 
-    if @user == nil
-      login_failure! "Login error: no matching credentials for the username/password you provided"
+    return login_failure!("Login error: no matching credentials for the username/password you provided") if @user == nil
+
+    if @user.logged_in
+      login_failure! "That account is already in use (perhaps a bad thing?)"
     else
+      @user.login!
+
       login_success! "You have successfully logged in, welcome!"
 
       join_world(@user, World.instance)

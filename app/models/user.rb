@@ -7,6 +7,7 @@ class User
    field :login, type: String
    field :hashed_password, type: String
    field :area_id, type: String
+   field :logged_in, type: Boolean, default: false
 
    belongs_to :instance
 
@@ -16,6 +17,8 @@ class User
                      presence: true
 
    validates :hashed_password, presence: true
+
+   scope :logged_in, where(logged_in: true)
 
    attr_accessor :password, :password_confirmation
 
@@ -41,6 +44,14 @@ class User
       else
          self.area_id = id_or_area.id
       end
+   end
+
+   def login!
+      update_attribute(:logged_in, true)
+   end
+
+   def logout!
+      update_attribute(:logged_in, false)
    end
 
 private
