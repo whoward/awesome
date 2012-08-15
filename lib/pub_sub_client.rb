@@ -2,8 +2,8 @@ require 'set'
 
 class PubSubClient
 
-   def initialize(instance)
-      @id = instance.id
+   def initialize(user)
+      @user = user
       @subscriptions = Set.new
       @listeners = Hash.new
 
@@ -15,14 +15,18 @@ class PubSubClient
    def connect!
       return if @connected
 
+      log "connecting to redis"
+
       @pub = EM::Hiredis.connect("redis://localhost:6379")
       @sub = EM::Hiredis.connect("redis://localhost:6379")
 
       @sub.on(:message) do |channel, message|
          event = channel.split(".").last
          data = parse_json(message)
+
+         log "rec: #{event.inspect} #{data.inspect}"
          
-         notify_listeners(event, data)
+         notify_listeners(event.to_sym, data)
       end
 
       @connected = true
@@ -37,24 +41,32 @@ class PubSubClient
       @connected = false
    end
 
+   ## publishing methods
+
    def broadcast(message)
-      publish :broadcast, message: message
+      instance_publish :broadcast, message: message
    end
 
    def chat(sender, message)
-      publish :chat, message: message, sender: sender
+      instance_publish :chat, message: message, sender: sender
    end
 
-   # handles all of the on_xyz methods
-   def respond_to?(method)
-      !!(method =~ /^on_(\w+)$/) or super
+   def private_message(recipient_id, sender, message)
+      publish recipient_id, :pm, message: message, sender: sender
    end
 
-   def method_missing(method, *args, &block)
-      if method.to_s =~ /^on_(\w+)$/
-         return add_listener($1, &block)
-      end
-      super
+   ## subscription methods
+
+   def on_broadcast(&block)
+      add_instance_listener :broadcast, &block
+   end
+
+   def on_chat(&block)
+      add_instance_listener :chat, &block
+   end
+
+   def on_private_message(&block)
+      add_user_listener :pm, &block
    end
 
 private
@@ -62,49 +74,84 @@ private
       case event.to_sym
          when :broadcast then data.values_at(:message)
          when :chat then data.values_at(:sender, :message)
+         when :pm then data.values_at(:sender, :message)
          else
             data
       end
    end
 
-   def add_listener(event, &block)
-      subscribe(event)
+   def add_instance_listener(event, &block)
+      add_listener @user.instance_id, event, &block
+   end
+
+   def add_user_listener(event, &block)
+      add_listener @user.id, event, &block
+   end
+
+   def add_listener(id, event, &block)
+      subscribe(id, event)
 
       (@listeners[event] ||= Set.new).add(block)
    end
 
-   def remove_listener(event, &block)
+   def remove_instance_listener(event, &block)
+      remove_listener @user.instance_id, event, &block
+   end
+
+   def remove_user_listener(event, &block)
+      remove_listener @user.id, event, &block
+   end
+
+   def remove_listener(id, event, &block)
       @listeners[event].try(:delete, block)
 
-      unsubscribe(event) if @listeners[event].empty?
+      unsubscribe(id, event) if @listeners[event].empty?
    end
 
    def notify_listeners(event, data)
       args = parse_event_arguments(event, data)
+
+      log "notify: #{event.inspect} #{@listeners.keys.inspect} #{@listeners[event].inspect}"
 
       (@listeners[event] || []).each do |listener|
          listener.call(*args)
       end
    end
 
-   def subscribe(event)
-      return if @subscriptions.include?(event)
+   def subscribe(id, event)
+      scoped_event = "#{id}.#{event}"
 
-      @subscriptions.add(event)
+      return if @subscriptions.include?(scoped_event)
+
+      log "sub: #{scoped_event.inspect}"
+
+      @subscriptions.add(scoped_event)
 
       connect!
 
-      @sub.subscribe("#{@id}.#{event}")
+      @sub.subscribe(scoped_event)
    end
 
-   def unsubscribe(event)
+   def unsubscribe(id, event)
       #TODO
    end
 
-   def publish(event, data={})
+   def user_publish(event, data={})
+      publish @user.id, event, data
+   end
+
+   def instance_publish(event, data={})
+      publish @user.instance_id, event, data
+   end
+
+   def publish(id, event, data={})
       connect!
 
-      @pub.publish("#{@id}.#{event}", encode_json(data))
+      scoped_event = "#{id}.#{event}"
+
+      log "pub: #{scoped_event.inspect} #{event.inspect} #{data.inspect}"
+
+      @pub.publish(scoped_event, encode_json(data))
    end
 
    def encode_json(obj)
@@ -113,6 +160,10 @@ private
   
    def parse_json(str)
       Yajl::Parser.parse(str, :symbolize_keys => true) rescue {}
+   end
+
+   def log(message)
+      Awesome::App.log(message)
    end
 
 end

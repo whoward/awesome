@@ -94,23 +94,28 @@ class ChatAction < Cramp::Websocket
   def handle_talk(data)
     pubsub.chat(@user.login, data[:message])
   end
+
+  def handle_pm(data)
+    #TODO: scope by logged in users
+    recipient = User.where(:login => data[:username]).first
+
+    if recipient == nil
+      return error_message! "#{data[:username]} is not logged in"
+    end
+
+    pubsub.private_message(recipient.id, @user.login, data[:message])
+  end
   
 private
   def join_instance(user, instance)
     user.instance = instance
     user.save!
-
-    pubsub.on_broadcast do |message|
-      broadcast! message
-    end
-
-    pubsub.on_chat do |sender, message|
-      display_talk! sender, message
-    end
   end
 
   def join_world(user, world)
     join_instance user, Instance.main_instance
+
+    subscribe!
 
     pubsub.broadcast "#{user.login} has logged on"
 
@@ -121,6 +126,20 @@ private
     end    
   end
 
+  def subscribe!
+    pubsub.on_broadcast do |message|
+      broadcast! message
+    end
+
+    pubsub.on_chat do |sender, message|
+      display_talk! sender, message
+    end
+
+    pubsub.on_private_message do |sender, message|
+      display_private_message! sender, message
+    end
+  end
+
   def set_area!(area)
     @user.area = area
     @user.save!
@@ -129,7 +148,7 @@ private
   end
 
   def pubsub
-    @pubsub ||= PubSubClient.new(Instance.main_instance)
+    @pubsub ||= PubSubClient.new(@user)
   end
 
 end

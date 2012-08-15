@@ -34,8 +34,16 @@ private
       emit :talk, sender: sender, message: message
    end
 
+   def display_private_message!(sender, message)
+      emit :pm, sender: sender, message: message
+   end
+
    def display_area!(area)
       emit :display_area, area: area.serialized_attributes
+   end
+
+   def error_message!(message)
+      emit :error, message: message
    end
 
    def undefined_direction!(message)

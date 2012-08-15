@@ -19,6 +19,10 @@ module Awesome
             @routes ||= eval File.read("./config/routes.rb")
          end
 
+         def log(message)
+            puts(message) unless env == "development"
+         end
+
          # Initialize the application
          def initialize!
             Cramp::Websocket.backend = :thin

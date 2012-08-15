@@ -50,6 +50,9 @@ class Connection extends BasicObject
          when "talk"
             GameScreen.instance.user_broadcast(message.sender, message.message)
 
+         when "pm"
+            GameScreen.instance.private_message_received(message.sender, message.message)
+
          when "broadcast"
             GameScreen.instance.message(message.message)
 
@@ -90,17 +93,11 @@ class Connection extends BasicObject
    socketClosed: (socket, event) ->
       GameScreen.instance.disconnect()
 
-      # @socket.on "pm", (message) ->
-      #    game_screen.private_message_received message.sender, message.message
-
       # @socket.on "list", (data) ->
       #    game_screen.user_list(data.users)
 
       # @socket.on "error", (error) =>
       #    this.error_received(error.type, error.message)
-
-   message: (message) ->
-      # @socket.emit "message", message
 
    command: (command, params) ->
       params.action = command
