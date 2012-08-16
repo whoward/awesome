@@ -128,7 +128,13 @@ private
    end
 
    def unsubscribe(id, event)
-      #TODO
+      scoped_event = "#{id}.#{event}"
+
+      connect!
+
+      log "unsub: #{scoped_event.inspect}"
+
+      @sub.unsubscribe(scoped_event)
    end
 
    def user_publish(event, data={})
