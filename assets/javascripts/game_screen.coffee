@@ -58,7 +58,7 @@ class GameScreen extends BasicObject
       @messages.colored "golden-yellow", "commands: /say /help /list /go"
 
    user_list: (users) ->
-      @messages.colored "blue", "Users: #{data.users.join(", ")}"
+      @messages.colored "blue", "Users: #{users.join(", ")}"
 
    user_broadcast: (sender, message) ->
       if sender == Connection.instance.username

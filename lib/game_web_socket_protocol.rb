@@ -42,6 +42,10 @@ private
       emit :display_area, area: area.serialized_attributes
    end
 
+   def user_list!(names)
+      emit :list, users: names
+   end
+
    def error_message!(message)
       emit :error, message: message
    end

@@ -109,6 +109,10 @@ class ChatAction < Cramp::Websocket
 
     pubsub.private_message(recipient.id, @user.login, data[:message])
   end
+
+  def handle_list(data)
+    user_list! User.logged_in.only(:login).map(&:login)
+  end
   
 private
   def join_instance(user, instance)

@@ -80,6 +80,9 @@ class Connection extends BasicObject
             LoginDialog.instance.hide()
             RegistrationDialog.instance.hide()
 
+         when "list"
+            GameScreen.instance.user_list(message.users)
+
          when "error"
             GameScreen.instance.error(message.message)
 
@@ -93,12 +96,6 @@ class Connection extends BasicObject
    socketClosed: (socket, event) ->
       GameScreen.instance.disconnect()
 
-      # @socket.on "list", (data) ->
-      #    game_screen.user_list(data.users)
-
-      # @socket.on "error", (error) =>
-      #    this.error_received(error.type, error.message)
-
-   command: (command, params) ->
+   command: (command, params={}) ->
       params.action = command
       @socket.send(params)
