@@ -4,7 +4,6 @@ class PubSubClient
 
    def initialize(user)
       @user = user
-      @subscriptions = Set.new
       @listeners = Hash.new
 
       @connected = false
@@ -121,13 +120,9 @@ private
    def subscribe(id, event)
       scoped_event = "#{id}.#{event}"
 
-      return if @subscriptions.include?(scoped_event)
+      connect!
 
       log "sub: #{scoped_event.inspect}"
-
-      @subscriptions.add(scoped_event)
-
-      connect!
 
       @sub.subscribe(scoped_event)
    end
