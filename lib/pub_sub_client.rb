@@ -9,8 +9,6 @@ class PubSubClient
       @connected = false
    end
 
-   #TODO: handle changing instances
-
    def connect!
       return if @connected
 
@@ -23,7 +21,7 @@ class PubSubClient
          event = channel.split(".").last
          data = parse_json(message)
 
-         log "rec: #{event.inspect} #{data.inspect}"
+         log "#{channel}: #{data.inspect}"
          
          notify_listeners(event.to_sym, data)
       end
@@ -51,7 +49,7 @@ class PubSubClient
    end
 
    def private_message(recipient_id, sender, message)
-      publish recipient_id, :pm, message: message, sender: sender
+      publish :user, recipient_id, :pm, message: message, sender: sender
    end
 
    ## subscription methods
@@ -80,45 +78,43 @@ private
    end
 
    def add_instance_listener(event, &block)
-      add_listener @user.instance_id, event, &block
+      add_listener :instance, @user.instance_id, event, &block
    end
 
    def add_user_listener(event, &block)
-      add_listener @user.id, event, &block
+      add_listener :user, @user.id, event, &block
    end
 
-   def add_listener(id, event, &block)
-      subscribe(id, event)
+   def add_listener(type, id, event, &block)
+      subscribe(type, id, event)
 
       (@listeners[event] ||= Set.new).add(block)
    end
 
    def remove_instance_listener(event, &block)
-      remove_listener @user.instance_id, event, &block
+      remove_listener :instance, @user.instance_id, event, &block
    end
 
    def remove_user_listener(event, &block)
-      remove_listener @user.id, event, &block
+      remove_listener :user, @user.id, event, &block
    end
 
-   def remove_listener(id, event, &block)
+   def remove_listener(type, id, event, &block)
       @listeners[event].try(:delete, block)
 
-      unsubscribe(id, event) if @listeners[event].empty?
+      unsubscribe(type, id, event) if @listeners[event].empty?
    end
 
    def notify_listeners(event, data)
       args = parse_event_arguments(event, data)
-
-      log "notify: #{event.inspect} #{@listeners.keys.inspect} #{@listeners[event].inspect}"
 
       (@listeners[event] || []).each do |listener|
          listener.call(*args)
       end
    end
 
-   def subscribe(id, event)
-      scoped_event = "#{id}.#{event}"
+   def subscribe(type, id, event)
+      scoped_event = "#{type}.#{id}.#{event}"
 
       connect!
 
@@ -127,8 +123,8 @@ private
       @sub.subscribe(scoped_event)
    end
 
-   def unsubscribe(id, event)
-      scoped_event = "#{id}.#{event}"
+   def unsubscribe(type, id, event)
+      scoped_event = "#{type}.#{id}.#{event}"
 
       connect!
 
@@ -138,17 +134,17 @@ private
    end
 
    def user_publish(event, data={})
-      publish @user.id, event, data
+      publish :user, @user.id, event, data
    end
 
    def instance_publish(event, data={})
-      publish @user.instance_id, event, data
+      publish :instance, @user.instance_id, event, data
    end
 
-   def publish(id, event, data={})
+   def publish(type, id, event, data={})
       connect!
 
-      scoped_event = "#{id}.#{event}"
+      scoped_event = "#{type}.#{id}.#{event}"
 
       log "pub: #{scoped_event.inspect} #{event.inspect} #{data.inspect}"
 
