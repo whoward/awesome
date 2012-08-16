@@ -14,10 +14,12 @@ class ChatAction < Cramp::Websocket
   end
   
   def disconnected
-    pubsub.broadcast "#{@user.login} has disconnected"
+    if @user
+      pubsub.broadcast "#{@user.login} has disconnected"
+      @user.logout!
+    end
+    
     pubsub.disconnect!
-
-    @user.try(:logout!)
   end
   
   def data_received(data)

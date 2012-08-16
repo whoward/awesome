@@ -20,7 +20,7 @@ module Awesome
          end
 
          def log(message)
-            puts(message) unless env == "development"
+            puts(message) if env == "development"
          end
 
          # Initialize the application
@@ -29,6 +29,8 @@ module Awesome
 
             Mongoid.load! File.join(root, "config", "mongoid.yml")
             Mongoid.allow_dynamic_fields = false
+
+            User.logged_in.update_all(logged_in: false) if env == "development"
          end
       end
    end
