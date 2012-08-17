@@ -90,11 +90,6 @@ class ChatAction < Cramp::Websocket
     end
 
     set_area!(next_area)
-
-    # if current_area
-      # current_area.notify_exit(this, direction)
-      # next_area.notify_entrance(this, current_area, direction)
-    # end
   end
   
   def handle_talk(data)
@@ -103,7 +98,7 @@ class ChatAction < Cramp::Websocket
 
   def handle_pm(data)
     #TODO: scope by logged in users
-    recipient = User.where(:login => data[:username]).first
+    recipient = User.logged_in.where(:login => data[:username]).first
 
     if recipient == nil
       return error_message! "#{data[:username]} is not logged in"
