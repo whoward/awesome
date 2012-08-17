@@ -148,12 +148,38 @@ private
     pubsub.on_private_message do |sender, message|
       display_private_message! sender, message
     end
+
+    pubsub.on_area_travel do |user, from_area_id, to_area_id|
+      # ignore travel messages from this user
+      if user != @user.login
+        if from_area_id == @user.area_id
+          # user is exiting the area
+          direction = @user.area.find_exit_by_id(to_area_id)
+
+          player_leaves_area! user, direction
+        else
+          # user is entering the area
+          direction = @user.area.find_exit_by_id(from_area_id)
+
+          player_enters_area! user, direction
+        end
+      end
+    end
   end
 
   def set_area!(area)
+    # notify other players of the user's movement
+    pubsub.area_travel(@user.login, @user.area_id, area.id)
+
+    # update the database record for the user's area
     @user.area = area
     @user.save!
 
+    # change the area we receive event notifications from
+    pubsub.area = area
+
+    # display the new area to the player (duplicate the area so that the player
+    # list is not permanently mutated).
     displayed_area = area.dup
     displayed_area.players = User.logged_in.where(area_id: area.id).only(:login).map(&:login)
 

@@ -46,6 +46,14 @@ private
       emit :list, users: names
    end
 
+   def player_leaves_area!(username, direction=nil)
+      emit :player_leaves_area, username: username, direction: direction
+   end
+
+   def player_enters_area!(username, direction=nil)
+      emit :player_enters_area, username: username, direction: direction
+   end
+
    def error_message!(message)
       emit :error, message: message
    end

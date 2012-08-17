@@ -80,6 +80,18 @@ class GameScreen extends BasicObject
          @input.set "/say #{sender} "
          false
 
+   player_enters_area: (username, direction=null) ->
+      if direction
+         @message "#{username} has entered the area from the #{direction} direction"
+      else
+         @message "#{username} has entered the area"
+
+   player_leaves_area: (username, direction=null) ->
+      if direction
+         @message "#{username} has left the area in the #{direction} direction"
+      else
+         @message "#{username} has left the area"
+
    area: (area) ->
       exit_count = (dir for dir, name of area.exits).length
 

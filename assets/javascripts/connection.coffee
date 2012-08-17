@@ -83,6 +83,12 @@ class Connection extends BasicObject
          when "list"
             GameScreen.instance.user_list(message.users)
 
+         when "player_enters_area"
+            GameScreen.instance.player_enters_area(message.username, message.direction)
+
+         when "player_leaves_area"
+            GameScreen.instance.player_leaves_area(message.username, message.direction)
+
          when "error"
             GameScreen.instance.error(message.message)
 

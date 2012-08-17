@@ -16,6 +16,10 @@ class Area
       alias :find :find_by_id
    end
 
+   def find_exit_by_id(id)
+      (exits || {}).detect {|name,exit_id| exit_id == id }.try(:first)
+   end
+
    def find_exit_by_name(name, world=World.instance)
       exit_id = (exits || {}).fetch(name, nil)
 
