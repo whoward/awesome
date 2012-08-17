@@ -97,7 +97,6 @@ class ChatAction < Cramp::Websocket
   end
 
   def handle_pm(data)
-    #TODO: scope by logged in users
     recipient = User.logged_in.where(:login => data[:username]).first
 
     if recipient == nil
