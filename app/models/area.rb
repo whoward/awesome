@@ -6,6 +6,7 @@ class Area
    attribute :name
    attribute :description
    attribute :exits
+   attribute :players
 
    def self.find_by_id(id, world=World.instance)
       world.find_area_by_id(id)
@@ -39,7 +40,7 @@ class Area
       {
          :name => name,
          :description => description,
-         :players => [], # TODO
+         :players => players,
          :exits => exits_with_names(world)
       }
    end

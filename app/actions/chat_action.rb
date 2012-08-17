@@ -154,6 +154,9 @@ private
     @user.area = area
     @user.save!
 
+    displayed_area = area.dup
+    displayed_area.players = User.logged_in.where(area_id: area.id).only(:login).map(&:login)
+
     display_area!(area)
   end
 

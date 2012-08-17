@@ -87,10 +87,10 @@ class GameScreen extends BasicObject
       
       @messages.append area.description.h()
 
-      # if area.people.length > 1
-      #    @messages.colored "cyan", "There are #{area.people.length} people here: #{area.people.join(", ")}"
-      # else
-      #    @messages.colored "cyan", "Nobody is here except you."
+      if area.players.length > 1
+         @messages.colored "cyan", "There are #{area.players.length} people here: #{area.players.join(", ")}"
+      else
+         @messages.colored "cyan", "Nobody is here except you."
 
       @messages.colored "purple", "There are #{exit_count} obvious exits:"
 
