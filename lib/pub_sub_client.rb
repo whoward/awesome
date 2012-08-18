@@ -38,13 +38,15 @@ class PubSubClient
       @connected = false
    end
 
+   #TODO: handle changing instances as well
+
    def area=(area)
       # unsubscribe from the current area
-      unsubscribe(:area, @area_id, :travel) if @area_id
+      unsubscribe(:instance, @user.instance_id, :area, @area_id, :travel) if @area_id
 
       @area_id = area.id
 
-      subscribe :area, @area_id, :travel
+      subscribe :instance, @user.instance_id, :area, @area_id, :travel
    end
 
    ## publishing methods
@@ -65,14 +67,17 @@ class PubSubClient
       # sometimes the area id's can match (both are nil or both are the same, like
       # what happens when a user is forcibly set to an area - example: when logging in)
       return if from_area_id == to_area_id
-      
+
+      #TODO: this needs to be instance scoped
+      data = {username: user, from_area_id: from_area_id, to_area_id: to_area_id}
+
       # publish an event for the exiting and entering area
       if from_area_id
-         publish :area, from_area_id, :travel, username: user, from_area_id: from_area_id, to_area_id: to_area_id
+         publish :instance, @user.instance_id, :area, from_area_id, :travel, data
       end
 
       if to_area_id
-         publish :area, to_area_id, :travel, username: user, from_area_id: from_area_id, to_area_id: to_area_id
+         publish :instance, @user.instance_id, :area, to_area_id, :travel, data
       end
    end
 
@@ -144,8 +149,10 @@ private
       end
    end
 
-   def subscribe(type, id, event)
-      scoped_event = "#{type}.#{id}.#{event}"
+   def subscribe(*keys)
+      raise ArgumentError.new("must have at least 1 key") if keys.length <= 1
+
+      scoped_event = keys.join(".")
 
       connect!
 
@@ -154,8 +161,10 @@ private
       @sub.subscribe(scoped_event)
    end
 
-   def unsubscribe(type, id, event)
-      scoped_event = "#{type}.#{id}.#{event}"
+   def unsubscribe(*keys)
+      raise ArgumentError.new("must have at least 1 key") if keys.length <= 1
+
+      scoped_event = keys.join(".")
 
       connect!
 
@@ -172,12 +181,14 @@ private
       publish :instance, @user.instance_id, event, data
    end
 
-   def publish(type, id, event, data={})
+   def publish(*keys, data)
+      raise ArgumentError.new("must have at least 1 key") if keys.length <= 1
+
+      scoped_event = keys.join(".")
+
       connect!
 
-      scoped_event = "#{type}.#{id}.#{event}"
-
-      log "pub: #{scoped_event.inspect} #{event.inspect} #{data.inspect}"
+      log "pub: #{scoped_event.inspect} #{data.inspect}"
 
       @pub.publish(scoped_event, encode_json(data))
    end

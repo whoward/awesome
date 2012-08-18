@@ -60,7 +60,6 @@ class ChatAction < Cramp::Websocket
   def handle_register(data)
     username = data[:username]
     password = data[:password]
-    #TODO: need a password confirmation
 
     if username.blank? or password.blank?
       return register_failure! "Please provide both a username and password"
@@ -107,17 +106,13 @@ class ChatAction < Cramp::Websocket
   end
 
   def handle_list(data)
-    user_list! User.logged_in.only(:login).map(&:login)
+    user_list! User.in_instance(@user.instance).only(:login).map(&:login)
   end
   
 private
-  def join_instance(user, instance)
-    user.instance = instance
-    user.save!
-  end
-
   def join_world(user, world)
-    join_instance user, Instance.main_instance
+    user.instance = Instance.main_instance
+    user.save!
 
     subscribe!
 
@@ -175,7 +170,7 @@ private
     # display the new area to the player (duplicate the area so that the player
     # list is not permanently mutated).
     displayed_area = area.dup
-    displayed_area.players = User.logged_in.where(area_id: area.id).only(:login).map(&:login)
+    displayed_area.players = User.in_instance(@user.instance).in_area(area).only(:login).map(&:login)
 
     display_area!(area)
   end

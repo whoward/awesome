@@ -20,6 +20,9 @@ class User
 
    scope :logged_in, where(logged_in: true)
 
+   scope :in_instance, -> instance { logged_in.where(instance_id: instance.id) }
+   scope :in_area,     -> area { where(area_id: area.id) }
+
    attr_accessor :password, :password_confirmation
 
    def self.find_by_credentials(credentials={})
