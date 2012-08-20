@@ -1,2 +1,3 @@
 config/mongoid.yml
 game.json
+game.js
