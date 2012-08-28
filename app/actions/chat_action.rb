@@ -176,7 +176,7 @@ private
   end
 
   def pubsub
-    @pubsub ||= PubSubClient.new(@user)
+    @pubsub ||= UserPubSubClient.new(@user)
   end
 
 end

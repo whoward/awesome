@@ -2,10 +2,8 @@ require 'set'
 
 class PubSubClient
 
-   def initialize(user)
-      @user = user
+   def initialize
       @listeners = Hash.new
-
       @connected = false
    end
 
@@ -38,101 +36,25 @@ class PubSubClient
       @connected = false
    end
 
-   #TODO: handle changing instances as well
-
-   def area=(area)
-      # unsubscribe from the current area
-      unsubscribe(:instance, @user.instance_id, :area, @area_id, :travel) if @area_id
-
-      @area_id = area.id
-
-      subscribe :instance, @user.instance_id, :area, @area_id, :travel
-   end
-
    ## publishing methods
-
-   def broadcast(message)
-      instance_publish :broadcast, message: message
-   end
-
-   def chat(sender, message)
-      instance_publish :chat, message: message, sender: sender
-   end
 
    def private_message(recipient_id, sender, message)
       publish :user, recipient_id, :pm, message: message, sender: sender
    end
 
-   def area_travel(user, from_area_id=nil, to_area_id=nil)
-      # sometimes the area id's can match (both are nil or both are the same, like
-      # what happens when a user is forcibly set to an area - example: when logging in)
-      return if from_area_id == to_area_id
 
-      #TODO: this needs to be instance scoped
-      data = {username: user, from_area_id: from_area_id, to_area_id: to_area_id}
+protected
 
-      # publish an event for the exiting and entering area
-      if from_area_id
-         publish :instance, @user.instance_id, :area, from_area_id, :travel, data
-      end
-
-      if to_area_id
-         publish :instance, @user.instance_id, :area, to_area_id, :travel, data
-      end
-   end
-
-   ## subscription methods
-
-   def on_broadcast(&block)
-      add_instance_listener :broadcast, &block
-   end
-
-   def on_chat(&block)
-      add_instance_listener :chat, &block
-   end
-
-   def on_private_message(&block)
-      add_user_listener :pm, &block
-   end
-
-   def on_area_travel(&block)
-      # since area is not constant we just register a general travel listener
-      # and the area writer property will handle subscription/unsubscription
-      (@listeners[:travel] ||= Set.new).add(block)
+   def parse_event_arguments(event, data)
+      []
    end
 
 private
-   def parse_event_arguments(event, data)
-      case event.to_sym
-         when :broadcast then data.values_at(:message)
-         when :chat then data.values_at(:sender, :message)
-         when :pm then data.values_at(:sender, :message)
-         when :travel then data.values_at(:username, :from_area_id, :to_area_id)
-         else
-            data
-      end
-   end
-
-   def add_instance_listener(event, &block)
-      add_listener :instance, @user.instance_id, event, &block
-   end
-
-   def add_user_listener(event, &block)
-      add_listener :user, @user.id, event, &block
-   end
-
+   
    def add_listener(type, id, event, &block)
       subscribe(type, id, event)
 
       (@listeners[event] ||= Set.new).add(block)
-   end
-
-   def remove_instance_listener(event, &block)
-      remove_listener :instance, @user.instance_id, event, &block
-   end
-
-   def remove_user_listener(event, &block)
-      remove_listener :user, @user.id, event, &block
    end
 
    def remove_listener(type, id, event, &block)
@@ -171,14 +93,6 @@ private
       log "unsub: #{scoped_event.inspect}"
 
       @sub.unsubscribe(scoped_event)
-   end
-
-   def user_publish(event, data={})
-      publish :user, @user.id, event, data
-   end
-
-   def instance_publish(event, data={})
-      publish :instance, @user.instance_id, event, data
    end
 
    def publish(*keys, data)

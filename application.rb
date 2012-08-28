@@ -43,6 +43,8 @@ module Awesome
    end
 end
 
+$:.unshift File.join(Awesome::App.root, "lib")
+
 # use bundler to ensure all 3rd party stuff is installed
 Bundler.require(:default, Awesome::App.env)
 
