@@ -6,5 +6,8 @@ module Scripting
          @event_manager ||= Scripting::EventManager.new
       end
 
+      def instance
+         Scripting::Instance.new(::Instance.main_instance)
+      end
    end
 end
