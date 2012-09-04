@@ -55,7 +55,7 @@ module Scripting
 
             elapsed_time = (now - @timer_last_called[id]) * 1000
 
-            callback.call(elapsed_time.to_i)
+            callback.call(elapsed_time)
 
             # if this was a one shot timer then remove the reference, otherwise
             # update the "last called time" in the hash
