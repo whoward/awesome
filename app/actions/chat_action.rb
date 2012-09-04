@@ -15,7 +15,6 @@ class ChatAction < Cramp::Websocket
   
   def disconnected
     if @user
-      pubsub.broadcast "#{@user.login} has disconnected"
       Awesome::App.scripting_engine.game.events.notify(:player_left, Scripting::Character.new(@user))
       @user.logout!
     end
@@ -117,7 +116,6 @@ private
 
     subscribe!
 
-    pubsub.broadcast "#{user.login} has logged on"
     Awesome::App.scripting_engine.game.events.notify(:player_joined, Scripting::Character.new(@user))
 
     if user.area
