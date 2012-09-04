@@ -36,7 +36,8 @@ module Awesome
 
             User.logged_in.update_all(logged_in: false) if env == "development"
 
-            scripting_engine.require("game.js")
+            scripting_engine.load("game.js")
+
             scripting_engine.game.events.notify(:initialized)
          end
       end

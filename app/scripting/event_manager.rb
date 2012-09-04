@@ -2,7 +2,7 @@ require 'set'
 
 module Scripting
    class EventManager
-      EventTypes = [:initialized, :player_joined, :player_left]
+      EventTypes = [:initialized, :shutdown, :player_joined, :player_left]
 
       def initialize
          @callbacks = Hash.new

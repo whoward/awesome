@@ -10,6 +10,12 @@ module Scripting
          assign_globals!
       end
 
+      def shutdown
+         game.events.notify(:shutdown)
+         @timers.each(&:cancel)
+         @timer_last_called.delete_if { true }
+      end
+
       def game
          @game ||= Scripting::Game.new
       end
@@ -18,7 +24,7 @@ module Scripting
          @console ||= Scripting::Console.new
       end
 
-      def require(filename)
+      def load(filename)
          file = SourceRoot.join(filename)
 
          if file.file?
