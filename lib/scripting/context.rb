@@ -3,10 +3,12 @@ require 'pathname'
 
 module Scripting
    class Context < V8::Context
-      SourceRoot = Pathname.new(Awesome::App.root)
-      
-      def initialize(*args)
-         super
+
+      def initialize(source_root, *args)
+         super(*args)
+         
+         @source_root = Pathname.new(source_root)
+
          assign_globals!
       end
 
@@ -25,8 +27,9 @@ module Scripting
       end
 
       def load(filename)
-         file = SourceRoot.join(filename)
+         file = @source_root.join(filename)
 
+         #TODO: ensure the file is readable and is not outside the source root directory
          if file.file?
             eval file.read
             true
@@ -36,7 +39,6 @@ module Scripting
       end
 
    private
-
       def assign_globals!
          self['game'] = game
          self['console'] = console

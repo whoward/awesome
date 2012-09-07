@@ -23,10 +23,6 @@ module Awesome
             puts(message) if env == "development"
          end
 
-         def scripting_engine
-            @engine ||= Scripting::Context.new
-         end
-
          # Initialize the application
          def initialize!
             Cramp::Websocket.backend = :thin
@@ -36,9 +32,7 @@ module Awesome
 
             User.logged_in.update_all(logged_in: false) if env == "development"
 
-            scripting_engine.load("game.js")
-
-            scripting_engine.game.events.notify(:initialized)
+            GameSystem.load_all!
          end
       end
    end
