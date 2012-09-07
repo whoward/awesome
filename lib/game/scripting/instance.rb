@@ -1,5 +1,5 @@
 
-module Scripting
+module Game::Scripting
    class Instance
 
       def initialize(instance)

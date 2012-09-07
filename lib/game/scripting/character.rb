@@ -1,5 +1,5 @@
 
-module Scripting
+module Game::Scripting
    class Character
 
       # for now we will duck type users in as characters but i'm keeping this

@@ -1,6 +1,6 @@
 require 'set'
 
-module Scripting
+module Game::Scripting
    class EventManager
       EventTypes = [:initialized, :shutdown, :player_joined, :player_left]
 

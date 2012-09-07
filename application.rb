@@ -32,12 +32,13 @@ module Awesome
 
             User.logged_in.update_all(logged_in: false) if env == "development"
 
-            GameSystem.load_all!
+            Game.load_all!
          end
       end
    end
 end
 
+# add the "lib" directory to the load path
 $:.unshift File.join(Awesome::App.root, "lib")
 
 # use bundler to ensure all 3rd party stuff is installed

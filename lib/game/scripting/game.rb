@@ -1,5 +1,5 @@
 
-module Scripting
+module Game::Scripting
    class Game
 
       def initialize
@@ -18,13 +18,13 @@ module Scripting
       def addTimer(milliseconds, callback)
          id = next_timer_id
          EventMachine.next_tick { add_timer id, EventMachine::Timer, milliseconds, callback }
-         id #TODO: look up what the issue is converting this back to javascript
+         id
       end
 
       def addPeriodicTimer(milliseconds, callback)
          id = next_timer_id
          EventMachine.next_tick { add_timer id, EventMachine::PeriodicTimer, milliseconds, callback }
-         id #TODO: look up what the issue is converting this back to javascript
+         id
       end
 
       def cancelTimer(id)

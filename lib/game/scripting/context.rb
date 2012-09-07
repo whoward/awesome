@@ -1,7 +1,7 @@
 require 'v8'
 require 'pathname'
 
-module Scripting
+module Game::Scripting
    class Context < V8::Context
 
       def initialize(source_root, *args)
