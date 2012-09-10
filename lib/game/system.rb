@@ -21,17 +21,21 @@ module Game
       def reload!
          shutdown!
          
+         validate!
+
+         # start up the scripting engine if the script exists
+         if data.script and File.file?(File.join @directory, data.script)
+            scripting_engine.load(data.script)
+            scripting_engine.game.events.notify(:initialized)
+         end
+      end
+
+      def validate!
          # force reparse of data file
          data
 
          # run through any data structures to enforce their loading/validation
          world
-
-         # start up the scripting engine if the script exists
-         if data.script and File.file?(data.script)
-            scripting_engine.load(data.script)
-            scripting_engine.game.events.notify(:initialized)
-         end
       end
 
       def name
@@ -60,15 +64,7 @@ module Game
 
    private
       def data
-         @data ||= lambda do
-            begin
-               Game::DataFile.new File.join(@directory, 'game.json')
-            rescue Exception => e
-               STDERR.puts "Error while loading game system: #{@slug}"
-               STDERR.puts e.backtrace.join("\n")
-               {}
-            end
-         end.call
+         @data ||= Game::DataFile.new File.join(@directory, 'game.json')
       end
    end
 end

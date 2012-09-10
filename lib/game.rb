@@ -26,7 +26,13 @@ module Game
 
       # load all other games
       (games - invalid).each do |path|
-         self.all << Game::System.new(path.basename.to_s, path)
+         begin
+            self.all << Game::System.new(path.basename.to_s, path)
+         rescue Exception => e
+            STDERR.puts "Error while loading game system: #{@slug}"
+            STDERR.puts e.message
+            STDERR.puts e.backtrace.join("\n")
+         end
       end
 
       # return all game systems

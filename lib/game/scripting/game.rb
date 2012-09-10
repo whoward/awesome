@@ -8,11 +8,11 @@ module Game::Scripting
       end
 
       def events
-         @event_manager ||= Scripting::EventManager.new
+         @event_manager ||= EventManager.new
       end
 
       def instance
-         Scripting::Instance.new(::Instance.main_instance)
+         Instance.new(::Instance.main_instance)
       end
 
       def addTimer(milliseconds, callback)

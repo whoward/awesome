@@ -19,11 +19,11 @@ module Game::Scripting
       end
 
       def game
-         @game ||= Scripting::Game.new
+         @game ||= Game.new
       end
 
       def console
-         @console ||= Scripting::Console.new
+         @console ||= Console.new
       end
 
       def load(filename)
