@@ -70,7 +70,7 @@ private
 
       @game.event(:player_joined, Game::Scripting::Character.new(user))
 
-      current_area = user.area_id ? @game.world.find_area_by_id(user.area_id) : @game.starting_area
+      current_area = @game.world.find_area_by_id(user.area_id) || @game.starting_area
 
       set_area!(current_area)
    end

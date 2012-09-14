@@ -35,6 +35,8 @@ class ApplicationSocket
          # what the user experience will be
          @socket.close()
 
+      console?.log("connecting to ", path)
+
       # create a new socket 
       @socket = new ReconnectingWebSocket("ws://#{window.location.host}#{path}")
 
