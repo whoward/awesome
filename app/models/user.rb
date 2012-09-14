@@ -2,15 +2,22 @@ require 'bcrypt'
 
 class User
    include Mongoid::Document
-   include Mongoid::Timestamps
+   include Mongoid::Timestamps::Created
 
    scope :logged_in, where(logged_in: true)
 
+   #TODO: remove me
+   scope :in_instance, -> instance { logged_in.where(instance_id: instance.id) }
+   scope :in_area,     -> area { where(area_id: area.id) }
+
    has_many :characters
+
+   belongs_to :instance
 
    field :login, type: String
    field :hashed_password, type: String
    field :logged_in, type: Boolean, default: false
+   field :area_id, type: String
 
    before_validation :assign_password
 

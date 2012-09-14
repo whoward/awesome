@@ -50,6 +50,10 @@ module Game
          data.version
       end
 
+      def starting_area
+         world.find_area_by_id(starting_area_id)
+      end
+
       def starting_area_id
          data.start_area_id
       end
@@ -60,6 +64,10 @@ module Game
 
       def scripting_engine
          @engine ||= Game::Scripting::Context.new(@directory)
+      end
+
+      def event(*args)
+         scripting_engine.game.events.notify(*args)
       end
 
    private

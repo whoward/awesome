@@ -11,7 +11,7 @@ module Game
       end
 
       def areas
-         @areas ||= data.map {|id, data| Game::Area.new(data) }
+         @areas ||= data.map {|id, data| Game::Area.new(data, self) }
       end
 
       def find_area_by_id(id)

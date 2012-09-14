@@ -7,6 +7,10 @@ module Game
       @all ||= []
    end
 
+   def self.find_by_slug(slug)
+      all.detect {|game| game.slug == slug }
+   end
+
    def self.load_all!
       #TODO: clean existing game systems out
 

@@ -1,4 +1,4 @@
-require 'app/models/entity'
+require 'entity'
 
 class Character < Entity
 

@@ -2,12 +2,16 @@
 
 class Connection extends BasicObject
    constructor: ->
-      @socket = new ApplicationSocket('/websocket')
+      @socket = new ApplicationSocket('/games')
 
       @socket.addListener(this)
 
    @get "instance", ->
       @__instance ||= new Connection()
+
+   sendSessionToken: (token) ->
+      @command "session"
+         token: token
 
    login: (name, password) ->
       @username = name
@@ -38,59 +42,94 @@ class Connection extends BasicObject
          direction: dir
          
 # private
+
+   setToken: (token) ->
+      @token = token
+
+      localStorage?._session_token = token
+
+   getToken: ->
+      @token ||= localStorage?._session_token
+
    socketOpened: (socket, event) ->
       GameScreen.instance.connected()
 
-   socketMessage: (socket, message) ->
-      action = message.action
+   socketMessage: (socket, data) ->
+      action = data.action
 
-      message.action = undefined
+      data.action = undefined
 
       switch action
+         when "error"
+            console?.error(data.message)
+
+         when "reconnect"
+            @socket.reconnect(data.path)
+
+         when "session"
+            @setToken(data.token)
+            @username = data.username
+
          when "talk"
-            GameScreen.instance.user_broadcast(message.sender, message.message)
+            GameScreen.instance.user_broadcast(data.sender, data.message)
 
          when "pm"
-            GameScreen.instance.private_message_received(message.sender, message.message)
+            GameScreen.instance.private_message_received(data.sender, data.message)
 
          when "broadcast"
-            GameScreen.instance.message(message.message)
+            GameScreen.instance.message(data.message)
 
          when "display_area"
-            GameScreen.instance.area(message.area)
+            GameScreen.instance.area(data.area)
 
-         when "login_required"
+         when "identify"
             @username = null
-            GameScreen.instance.message(message.message)
+
+            token = @getToken()
+
+            console.log("received identify command, token: ", token)
+
+            if token
+               console.log("sending token")
+               @sendSessionToken(token)
+            else
+               console.log("showing login screen")
+               LoginDialog.instance.show()
+
+         when "session_failure"
+            console?.error(data.message)
+
+            @setToken null
+            
             LoginDialog.instance.show()
 
          when "login_success"
-            GameScreen.instance.message(message.message)
+            GameScreen.instance.message(data.message)
             LoginDialog.instance.hide()
             RegistrationDialog.instance.hide()
 
          when "login_failure"
-            alert(message.message)
+            alert(data.message)
 
          when "register_failure"
-            alert(message.message)
+            alert(data.message)
 
          when "register_success"
-            GameScreen.instance.message(message.message)
+            GameScreen.instance.message(data.message)
             LoginDialog.instance.hide()
             RegistrationDialog.instance.hide()
 
          when "list"
-            GameScreen.instance.user_list(message.users)
+            GameScreen.instance.user_list(data.users)
 
          when "player_enters_area"
-            GameScreen.instance.player_enters_area(message.username, message.direction)
+            GameScreen.instance.player_enters_area(data.username, data.direction)
 
          when "player_leaves_area"
-            GameScreen.instance.player_leaves_area(message.username, message.direction)
+            GameScreen.instance.player_leaves_area(data.username, data.direction)
 
-         when "error"
-            GameScreen.instance.error(message.message)
+         when "user_error"
+            GameScreen.instance.error(data.message)
 
          when "undefined_direction"
             GameScreen.instance.error "You can't go that way"

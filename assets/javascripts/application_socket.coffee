@@ -2,29 +2,47 @@
 
 class ApplicationSocket
 
-   constructor: (@path, @domain=window.location.host) ->
+   constructor: (path) ->
       @listeners = []
       @queue = []
 
-      @socket = new ReconnectingWebSocket("ws://#{@domain}#{@path}")
-
-      @socket.onopen    = ((ev)=> @socketOpened(ev)   )
-      @socket.onerror   = ((ev)=> @socketErrored(ev)  )
-      @socket.onclose   = ((ev)=> @socketClosed(ev)   )
-      @socket.onmessage = ((ev)=> @socketMessaged(ev) )
+      @reconnect(path)
 
    addListener: (listener) ->
-      @listeners.push(listener)
-      #TODO: only add if not already added
+      @listeners.push(listener) unless @listeners.indexOf(listener) >= 0
 
    removeListener: (listener) ->
-      #TODO: write me
+      idx = @listeners.indexOf(listener)
+
+      if idx >= 0
+         @listeners.splice(idx, 1)
 
    send: (message) ->
       if @socket.readyState is WebSocket.OPEN
          @socket.send(JSON.stringify(message))
       else
          @queue.push(message)
+
+   reconnect: (path) ->
+      # perform garbage collection of any existing socket
+      if @socket
+         @socket.onopen = null
+         @socket.onerror = null
+         @socket.onclose = null
+         @socket.onmessage = null
+
+         #TODO: maybe this should go before we null out the callbacks? not sure 
+         # what the user experience will be
+         @socket.close()
+
+      # create a new socket 
+      @socket = new ReconnectingWebSocket("ws://#{window.location.host}#{path}")
+
+      # assign callbacks to the web socket methods
+      @socket.onopen    = ((ev)=> @socketOpened(ev)   )
+      @socket.onerror   = ((ev)=> @socketErrored(ev)  )
+      @socket.onclose   = ((ev)=> @socketClosed(ev)   )
+      @socket.onmessage = ((ev)=> @socketMessaged(ev) )
 
 # private -------------
    socketOpened: (ev) ->
