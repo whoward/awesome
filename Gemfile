@@ -10,7 +10,6 @@ gem 'async-rack',  '0.5.1'
 gem 'em-hiredis', :git => "git://github.com/mloughran/em-hiredis.git"
 gem 'yajl-ruby', '1.1.0'
 
-gem 'active_attr', '0.6.0'
 gem 'activesupport', '3.1.0'
 
 gem 'mongoid', '3.0.3'
