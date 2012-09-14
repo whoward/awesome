@@ -5,10 +5,13 @@ class LobbyAction < Cramp::Websocket
 
    on_start :connected
    on_finish :disconnected
-   on_data :data_received
 
    def connected
       identify!
+   end
+
+   def disconnected
+
    end
 
 private

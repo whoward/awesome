@@ -7,7 +7,6 @@ class GameAction < Cramp::Websocket
 
    on_start :connected
    on_finish :disconnected
-   on_data :data_received
    
    def connected
       puts "connected to game with params: #{params.inspect}"
@@ -63,9 +62,6 @@ class GameAction < Cramp::Websocket
 private
    def session_created(session)
       @session = session
-
-      puts @session.inspect
-      puts @session.user.inspect
 
       user.instance = Instance.main_instance
       user.save!
