@@ -12,7 +12,7 @@ class RegistrationDialog extends BasicObject
 
       @register = jQuery("<button/>").html("Register").appendTo(@root)
 
-      @root.jqm(modal: true)
+      # @root.jqm(modal: true)
 
       jQuery(window).bind("resize", => 
          left = jQuery(window).width() / 2 - jQuery(@root).width() / 2
@@ -30,8 +30,10 @@ class RegistrationDialog extends BasicObject
       @__instance ||= new RegistrationDialog("body")
 
    show: ->
-      @root.jqmShow()
+      #@root.jqmShow()
+      @root.show()
       @username.focus()
 
    hide: ->
-      @root.jqmHide()
+      # @root.jqmHide()
+      @root.hide()

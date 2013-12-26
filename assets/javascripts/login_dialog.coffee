@@ -14,7 +14,7 @@ class LoginDialog extends BasicObject
 
       @register = jQuery("<a href='#'/>").html("Register").appendTo(@root)
 
-      @root.jqm(modal: true)
+      # @root.jqm(modal: true)
 
       jQuery(window).bind("resize", => 
          left = jQuery(window).width() / 2 - jQuery(@root).width() / 2
@@ -37,11 +37,13 @@ class LoginDialog extends BasicObject
       @__instance ||= new LoginDialog("body")
 
    show: ->
-      @root.jqmShow()
+      #@root.jqmShow()
+      @root.show()
       @username.focus()
 
    hide: ->
-      @root.jqmHide()
+      #@root.jqmHide()
+      @root.hide()
 
    submit: ->
       Connection.instance.login(@username.val(), @password.val())
