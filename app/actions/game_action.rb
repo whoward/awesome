@@ -91,14 +91,16 @@ private
       pubsub.on_area_travel do |travelling_user, from_area_id, to_area_id|
          # ignore travel messages from this user
          if travelling_user != user.login
+            area = @game.world.find_area_by_id(user.area_id)
+
             if from_area_id == user.area_id
                # user is exiting the area
-               direction = user.area.find_exit_by_id(to_area_id)
+               direction = area.find_exit_by_id(to_area_id)
 
                player_leaves_area! travelling_user, direction
             else
                # user is entering the area
-               direction = user.area.find_exit_by_id(from_area_id)
+               direction = area.find_exit_by_id(from_area_id)
 
                player_enters_area! travelling_user, direction
             end
