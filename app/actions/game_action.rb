@@ -1,3 +1,7 @@
+require 'travel_handler'
+require 'talk_handler'
+require 'private_message_handler'
+require 'list_handler'
 
 class GameAction < Cramp::Websocket
    include GameWebSocketHandler
@@ -31,35 +35,22 @@ class GameAction < Cramp::Websocket
    end
 
    def handle_travel(data)
-      current_area = @game.world.find_area_by_id(user.area_id)
-      next_area = current_area.find_exit_by_name(data[:direction])
-
-      if next_area == nil
-         return undefined_direction! "You canot go in that direction"
-      end
-
-      set_area!(next_area)
+      TravelHandler.new(self, data, @game, @session).perform
    end
    
    def handle_talk(data)
-      pubsub.chat(user.login, data[:message])
+      TalkHandler.new(self, data, @game, @session).perform
    end
 
    def handle_pm(data)
-      recipient = User.logged_in.where(:login => data[:username]).first
-
-      if recipient == nil
-         return error_message! "#{data[:username]} is not logged in"
-      end
-
-      pubsub.private_message(recipient.id, user.login, data[:message])
+      PrivateMessageHandler.new(self, data, @game, @session).perform
    end
 
    def handle_list(data)
-      user_list! User.in_instance(user.instance).only(:login).map(&:login)
+      ListHandler.new(self, data, @game, @session).perform
    end
    
-private
+# private
    def session_created(session)
       @session = session
 

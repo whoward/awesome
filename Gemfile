@@ -23,3 +23,7 @@ gem 'therubyracer',  '0.10.1'
 gem 'sprockets',     '2.4.5'
 gem 'coffee-script', '2.2.0'
 gem 'sass',          '3.1.20'
+
+group :test do
+	gem 'rspec'
+end

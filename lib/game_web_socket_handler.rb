@@ -26,62 +26,14 @@ module GameWebSocketHandler
    end
 
    def handle_session(data)
-      token = data[:token]
-
-      protocol_error! "missing parameter: token" if token.blank?
-
-      session = Session.where(token: token).first
-
-      if session.try(:expired?)
-         session_failure! "session has expired"
-      elsif session
-         session_created(session)
-      else
-         session_failure! "invalid session"
-      end
+      SessionHandler.new(self, data).perform
    end
 
    def handle_login(data)
-      username = data[:username]
-      password = data[:password]
-
-      if username.blank? or password.blank?
-         return login_failure! "Please provide both a username and password"
-      end
-
-      user = User.find_by_credentials login: username, password: password
-
-      if user == nil
-         return login_failure!("Login error: no matching credentials for the username/password you provided")
-      end
-
-      if user.logged_in
-         login_failure! "That account is already in use (perhaps a bad thing?)"
-      else
-         login_success! "You have successfully logged in, welcome!"
-
-         session_created Session.generate!(user)
-      end
+      LoginHandler.new(self, data).perform
    end
 
    def handle_register(data)
-      username = data[:username]
-      password = data[:password]
-
-      if username.blank? or password.blank?
-         return register_failure! "Please provide both a username and password"
-      end
-
-      user = User.new(login: username, password: password, password_confirmation: password)
-
-      if user.valid?
-         user.save!
-
-         register_success! "You have successfully registered! now logging you in."
-
-         session_created Session.generate!(user)
-      else
-         register_failure! "Whoops! #{user.errors.full_messages.to_sentence}"
-      end
+      RegisterHandler.new(self, data).perform
    end
 end
