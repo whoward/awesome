@@ -1,10 +1,6 @@
+require 'awesome/action'
 
-class LobbyAction < Cramp::Websocket
-   include GameWebSocketHandler
-   include SessionSocketProtocol
-
-   on_start :connected
-   on_finish :disconnected
+class LobbyAction < Awesome::Action
 
    def connected
       identify!
@@ -20,7 +16,7 @@ private
       @session = session
 
       # let the user know to use this session in future identifications
-      set_session!(session)
+      protocol.set_session!(session)
 
       #TODO: if the user has not yet selected a game then ask them to select one
       #
@@ -33,7 +29,7 @@ private
       #TODO: have the user select a character
 
       # tell the user to reconnect at the appropriate game socket
-      reconnect! "/games/#{session.game}"
+      protocol.reconnect! "/games/#{session.game}"
    end
 
 end

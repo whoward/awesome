@@ -1,16 +1,6 @@
-require 'travel_handler'
-require 'talk_handler'
-require 'private_message_handler'
-require 'list_handler'
+require 'awesome/action'
 
-class GameAction < Cramp::Websocket
-   include GameWebSocketHandler
-
-   include SessionSocketProtocol
-   include GameSocketProtocol
-
-   on_start :connected
-   on_finish :disconnected
+class GameAction < Awesome::Action
    
    def connected
       puts "connected to game with params: #{params.inspect}"
@@ -18,9 +8,9 @@ class GameAction < Cramp::Websocket
       @game = Game.find_by_slug(params[:slug])
 
       if @game
-         identify!
+         protocol.identify!
       else
-         user_error! "Can not find a game to connect to on this channel"
+         protocol.user_error! "Can not find a game to connect to on this channel"
       end
    end
    
@@ -35,19 +25,19 @@ class GameAction < Cramp::Websocket
    end
 
    def handle_travel(data)
-      TravelHandler.new(self, data, @game, @session).perform
+      TravelHandler.new(protocol, data, @game, @session).perform
    end
    
    def handle_talk(data)
-      TalkHandler.new(self, data, @game, @session).perform
+      TalkHandler.new(protocol, data, @game, @session).perform
    end
 
    def handle_pm(data)
-      PrivateMessageHandler.new(self, data, @game, @session).perform
+      PrivateMessageHandler.new(protocol, data, @game, @session).perform
    end
 
    def handle_list(data)
-      ListHandler.new(self, data, @game, @session).perform
+      ListHandler.new(protocol, data, @game, @session).perform
    end
    
 # private
