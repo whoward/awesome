@@ -2,6 +2,7 @@ require 'websocket_protocol'
 
 module Awesome
    class Action < Cramp::Websocket
+      UnhandledMessageError = Class.new(StandardError)
 
       on_start :connected
       on_finish :disconnected
@@ -16,19 +17,24 @@ module Awesome
       end
 
       def data_received(data)
-         #TODO: security error here (should never symbolize untrusted data)
-         #TODO: don't just rescue an empty hash - handle that damn error
-         msg = Yajl::Parser.parse(data, symbolize_keys: true) rescue {}
+         begin
+            message = Message.parse(data)
 
-         handler_method = "handle_#{msg[:action]}"
+            #TODO: use a state machine for session, if not validated then do not allow any action
 
-         #TODO: use a state machine for session, if not validated then do not allow any action
-
-         if respond_to?(handler_method, false)
-            send(handler_method, msg)
-         else
-            puts "unhandled message action: #{msg[:action].inspect}"
-            #TODO: actually do something - don't just fail silently
+            if respond_to?("handle_#{message.action}", false)
+               send("handle_#{message.action}", message)
+            else
+               raise UnhandledMessageError
+            end
+         rescue Message::ParseError => e
+            protocol.protocol_error! "malformed message"
+            #TODO: use logger.debug instead
+            puts "malformed message: #{data}"
+         rescue UnhandledMessageError => e
+            protocol.protocol_error! "unhandled message action: #{message.action.inspect}"
+            #TODO: use logger.debug instead
+            puts "unhandled message action: #{message.action.inspect}"
          end
       end
 
@@ -45,6 +51,7 @@ module Awesome
       end
 
    private
+
       def protocol
          @protocol ||= WebsocketProtocol.new(self)
       end
