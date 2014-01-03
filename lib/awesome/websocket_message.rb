@@ -1,7 +1,7 @@
 require 'json'
 
 module Awesome
-   class Message
+   class WebsocketMessage
       ParseError = Class.new(StandardError)
 
       KnownKeys = %w(action username password token direction).freeze
