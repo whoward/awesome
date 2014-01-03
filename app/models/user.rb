@@ -48,6 +48,10 @@ class User
       update_attribute(:logged_in, false)
    end
 
+   def to_script_object
+      Game::Scripting::Character.new(self)
+   end
+
 private
    def assign_password
       return if (password.blank? or password_confirmation.blank?) or password != password_confirmation

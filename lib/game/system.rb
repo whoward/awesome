@@ -26,7 +26,7 @@ module Game
          # start up the scripting engine if the script exists
          if data.script and File.file?(File.join @directory, data.script)
             scripting_engine.load(data.script)
-            scripting_engine.game.events.notify(:initialized)
+            event(:initialized)
          end
       end
 

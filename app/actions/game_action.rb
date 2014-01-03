@@ -28,7 +28,7 @@ class GameAction < Cramp::Websocket
       if user
          user.logout!
 
-         @game.event(:player_left, Game::Scripting::Character.new(user))
+         @game.event(:player_left, user)
       end
 
       pubsub.disconnect!
@@ -59,7 +59,7 @@ class GameAction < Cramp::Websocket
 
       subscribe!
 
-      @game.event(:player_joined, Game::Scripting::Character.new(user))
+      @game.event(:player_joined, user)
 
       current_area = @game.world.find_area_by_id(user.area_id) || @game.starting_area
 

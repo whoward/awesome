@@ -17,7 +17,7 @@ module Game::Scripting
 
       #TODO: figure out how to hide this from javascript
       def notify(event, *args)
-         (@callbacks[event] || []).each {|cb| cb.call(*args) }
+         (@callbacks[event] || []).each {|cb| cb.call(*args.map(&:to_script_object)) }
          nil
       end
 
