@@ -1,6 +1,7 @@
 require 'set'
 require 'json'
-require 'null_logger'
+require 'awesome/null_logger'
+require 'awesome/channel_message'
 
 module Awesome
    class ChannelSubscriber
@@ -36,15 +37,13 @@ module Awesome
    protected
 
       def message(event, data)
-         begin
-            message = ChannelMessage.parse(event, data)
+         message = ChannelMessage.parse(event, data)
 
-            logger.info("#{event} #{data}")
+         logger.info("#{event} #{data}")
 
-            listeners[event].each {|l| l.call(*message.to_params) }
-         rescue ChannelMessage::ParseError => e
-            logger.error("subscription parse error: #{e.message}")
-         end
+         listeners[event].each {|l| l.call(message) }
+      rescue ChannelMessage::ParseError => e
+         logger.error("subscription parse error: #{e.message}")
       end
 
    private

@@ -1,5 +1,5 @@
-require 'already_connected_error'
-require 'not_connected_error'
+require 'awesome/already_connected_error'
+require 'awesome/not_connected_error'
 
 module Awesome
    class RedisChannel

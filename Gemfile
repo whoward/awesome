@@ -25,5 +25,6 @@ gem 'coffee-script', '2.2.0'
 gem 'sass',          '3.1.20'
 
 group :test do
-	gem 'rspec'
+   gem 'rspec'
+   gem 'guard-rspec'
 end

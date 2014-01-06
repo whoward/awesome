@@ -18,6 +18,10 @@ module Awesome
          channel.publish(event, message)
       end
 
+      def private_message(recipient_id, sender, message)
+         publish :user, recipient_id, :pm, sender: sender, message: message
+      end
+
    private
       attr_reader :channel, :logger
    

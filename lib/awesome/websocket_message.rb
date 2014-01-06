@@ -10,7 +10,7 @@ module Awesome
          begin
             new(JSON.parse(raw))
          rescue JSON::ParserError => e
-            raise ParseError(e.message)
+            raise ParseError.new(e.message)
          end
       end
 
@@ -19,7 +19,7 @@ module Awesome
       end
 
       def [](rhs)
-         data[rhs.to_str]
+         data[rhs.to_s]
       end
 
       KnownKeys.each do |key|

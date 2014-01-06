@@ -3,11 +3,15 @@ module Awesome
    class ChannelMessage
       ParseError = Class.new(StandardError)
 
+      KnownKeys = %w(message sender username from_area_id to_area_id).freeze
+
+      attr_reader :event, :data
+
       def self.parse(event, message)
          begin
             new(event, JSON.parse(message))
          rescue JSON::ParserError => e
-            raise ParseError(e.message)
+            raise ParseError.new(e.message)
          end
       end
 
@@ -16,21 +20,18 @@ module Awesome
          @data = data
       end
 
+      KnownKeys.each do |key|
+         define_method(key) { data[key] }
+      end
+
+      def [](key)
+         data[key.to_s]
+      end
+
       def to_str
          "#{event}: #{data}"
       end
-
-      def to_params
-         case event
-         when "broadcast" then data.values_at("message")
-         when "chat" then data.values_at("sender", "message")
-         when "pm" then data.values_at("sender", "message")
-         when "travel" then data.values_at("username", "from_area_id", "to_area_id")
-         end
-      end
-
-   private
-      attr_reader :event, :data
+      alias :to_s :to_str
 
    end
 end
