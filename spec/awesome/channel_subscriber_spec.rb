@@ -43,6 +43,24 @@ describe Awesome::ChannelSubscriber do
       channel.publish("instance.123.broadcast", '{"message": }')
    end
 
+   context "#subscribed_events" do
+      it "provides a method to list all events it's subscribed to" do
+         subscriber.listen(:instance, 123, :broadcast) {}
+         subscriber.listen(:instance, 456, :broadcast) {}
+
+         expect(subscriber.subscribed_events).to eq(["instance.123.broadcast", "instance.456.broadcast"])
+      end
+
+      it "does not include events which no longer have listeners" do
+         callback = -> {}
+
+         subscriber.listen(:instance, 123, :broadcast, &callback)
+         subscriber.unlisten(:instance, 123, :broadcast, &callback)
+
+         expect(subscriber.subscribed_events).to eq([])
+      end
+   end
+
    context "when subscribed" do
       let(:listener_a) { -> ev {} }
       let(:listener_b) { -> ev {} }

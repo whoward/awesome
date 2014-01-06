@@ -34,7 +34,20 @@ module Awesome
          end
       end
 
+      def subscribed_events
+         listeners.keys.reject {|k| listeners[k].empty? }
+      end
+
    protected
+      attr_reader :channel, :logger, :listeners
+
+      def resubscribe(old_event, new_event)
+         listeners[new_event] = listeners.delete(old_event)
+
+         channel.subscribe(new_event, &method(:message))
+
+         channel.unsubscribe(old_event)
+      end
 
       def message(event, data)
          message = ChannelMessage.parse(event, data)
@@ -45,9 +58,6 @@ module Awesome
       rescue ChannelMessage::ParseError => e
          logger.error("subscription parse error: #{e.message}")
       end
-
-   private
-      attr_reader :channel, :logger, :listeners
 
    end
 end
