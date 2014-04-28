@@ -17,25 +17,23 @@ module Awesome
       end
 
       def data_received(data)
-         begin
-            message = WebsocketMessage.parse(data)
+         message = WebsocketMessage.parse(data)
 
-            #TODO: use a state machine for session, if not validated then do not allow any action
+         #TODO: use a state machine for session, if not validated then do not allow any action
 
-            if respond_to?("handle_#{message.action}", false)
-               send("handle_#{message.action}", message)
-            else
-               raise UnhandledMessageError
-            end
-         rescue WebsocketMessage::ParseError => e
-            protocol.protocol_error! "malformed message"
-            #TODO: use logger.debug instead
-            puts "malformed message: #{data}"
-         rescue UnhandledMessageError => e
-            protocol.protocol_error! "unhandled message action: #{message.action.inspect}"
-            #TODO: use logger.debug instead
-            puts "unhandled message action: #{message.action.inspect}"
+         if respond_to?("handle_#{message.action}", false)
+            send("handle_#{message.action}", message)
+         else
+            raise UnhandledMessageError
          end
+      rescue WebsocketMessage::ParseError => e
+         protocol.protocol_error! "malformed message"
+         #TODO: use logger.debug instead
+         puts "malformed message: #{data}"
+      rescue UnhandledMessageError => e
+         protocol.protocol_error! "unhandled message action: #{message.action.inspect}"
+         #TODO: use logger.debug instead
+         puts "unhandled message action: #{message.action.inspect}"
       end
 
       def handle_session(data)

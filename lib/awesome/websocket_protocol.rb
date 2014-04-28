@@ -65,7 +65,7 @@ module Awesome
       end
 
       def display_area!(area, players)
-         emit :display_area, area: area.serialized_attributes.merge(players: players)
+         # emit :display_area, area: area.serialized_attributes.merge(players: players)
       end
 
       def user_list!(names)
