@@ -13,14 +13,14 @@ gem 'yajl-ruby', '1.1.0'
 gem 'active_attr', '0.6.0'
 gem 'activesupport', '3.1.0'
 
-gem 'mongoid', '3.0.3'
-gem 'bson_ext', '1.6.4'
+gem 'mongoid', '3.0.23'
+gem 'bson_ext', '1.12.3'
 
 gem 'bcrypt-ruby', '3.0.1'
 
-gem 'therubyracer',  '0.10.1'
+gem 'therubyracer',  '0.12.2'
 
 # asset pipeline
-gem 'sprockets',     '2.4.5'
-gem 'coffee-script', '2.2.0'
-gem 'sass',          '3.1.20'
+gem 'sprockets',     '3.2.0'
+gem 'coffee-script', '2.4.1'
+gem 'sass',          '3.4.15'
