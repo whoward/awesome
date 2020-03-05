@@ -21,6 +21,6 @@ gem 'bcrypt-ruby', '3.0.1'
 gem 'therubyracer',  '0.12.2'
 
 # asset pipeline
-gem 'sprockets',     '3.2.0'
+gem 'sprockets',     '4.0.0'
 gem 'coffee-script', '2.4.1'
 gem 'sass',          '3.4.15'
