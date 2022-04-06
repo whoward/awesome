@@ -11,7 +11,7 @@ gem 'em-hiredis', :git => "git://github.com/mloughran/em-hiredis.git"
 gem 'yajl-ruby', '1.4.2'
 
 gem 'active_attr', '0.6.0'
-gem 'activesupport', '3.1.0'
+gem 'activesupport', '3.2.22.5'
 
 gem 'mongoid', '3.0.23'
 gem 'bson_ext', '1.12.3'
