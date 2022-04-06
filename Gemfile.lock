@@ -79,7 +79,7 @@ GEM
     tzinfo (0.3.44)
     url_mount (0.2.1)
       rack
-    yajl-ruby (1.4.1)
+    yajl-ruby (1.4.2)
 
 PLATFORMS
   ruby
@@ -100,4 +100,4 @@ DEPENDENCIES
   sprockets (= 4.0.0)
   therubyracer (= 0.12.2)
   thin (= 1.4.1)
-  yajl-ruby (= 1.4.1)
+  yajl-ruby (= 1.4.2)
