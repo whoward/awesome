@@ -8,7 +8,7 @@ gem 'http_router', '0.11.0'
 gem 'async-rack',  '0.5.1'
 
 gem 'em-hiredis', :git => "git://github.com/mloughran/em-hiredis.git"
-gem 'yajl-ruby', '1.4.2'
+gem 'yajl-ruby', '1.4.3'
 
 gem 'active_attr', '0.6.0'
 gem 'activesupport', '3.2.22.5'
